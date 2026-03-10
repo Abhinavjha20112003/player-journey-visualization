@@ -7,6 +7,10 @@ import matplotlib.image as mpimg
 import seaborn as sns
 
 st.title("Player Journey Visualization Tool")
+uploaded_file = st.file_uploader(
+    "Upload player_data.zip",
+    type="zip"
+)
 
 # ---------------- LOAD DATA ----------------
 
@@ -27,7 +31,21 @@ def load_all_data(folder):
     return pd.concat(frames, ignore_index=True)
 
 
-df = load_all_data("player_data")
+if uploaded_file is not None:
+
+    import zipfile
+    import tempfile
+
+    temp_dir = tempfile.mkdtemp()
+
+    with zipfile.ZipFile(uploaded_file, "r") as zip_ref:
+        zip_ref.extractall(temp_dir)
+
+    df = load_all_data(temp_dir)
+
+else:
+    st.warning("Please upload the player_data.zip file to continue.")
+    st.stop()
 
 # decode events
 df["event"] = df["event"].apply(
@@ -235,5 +253,6 @@ sns.kdeplot(
 
 ax2.set_xlim(0,1024)
 ax2.set_ylim(1024,0)
+
 
 st.pyplot(fig2)
